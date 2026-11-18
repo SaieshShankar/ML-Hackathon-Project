@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.venv/
+*.joblib
+*.npz
+*.zip
+/leaflet/
+/run/
+/PathSnap_Folium_Demo.html
+.env
