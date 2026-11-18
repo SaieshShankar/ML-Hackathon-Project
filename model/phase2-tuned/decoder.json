@@ -1,0 +1,7 @@
+{
+  "emission": 0.7,
+  "learned": 0.7,
+  "gap_seconds": 30.0,
+  "gap_power": 0.25,
+  "unreachable_penalty": 0.0
+}

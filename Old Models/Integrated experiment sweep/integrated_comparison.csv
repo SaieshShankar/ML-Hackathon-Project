@@ -1,0 +1,6 @@
+pipeline,decoder,cv_macro_f1,student_macro_f1,student_top1,reverse_errors,trips_at_090,selected_by_cv
+Previous in-house best (XGBoost Ranker + direction rules),direction rules,0.8459603095075667,0.8647014601736501,0.903705636743215,881,,False
+Attached LightGBM (replayed),legacy,0.8664127659856045,0.8791966668721161,0.9218162839248434,,3,False
+"LightGBM + context + heading, all trips",topology_learned_no_reset,0.8806346641935301,0.9064540798834375,0.9284446764091858,575,6,True
+"LightGBM + context, filtered",topology_learned_no_reset,0.8804906706829966,0.9018903469241234,0.9349686847599165,460,4,False
+"LightGBM + context + heading, filtered",topology_learned_no_reset,0.8797635590700221,0.9035067186192949,0.9327244258872651,443,6,False

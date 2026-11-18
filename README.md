@@ -1,53 +1,65 @@
-# PathSnap
+# PathSnap champion
 
-PathSnap matches noisy GPS observations to candidate road arcs. This repository contains the five-model, classifier-only benchmark and the offline Folium demo for a randomly selected student-test trip.
+**Phase 2 default · 0.9127 student-test Macro F1 · 91.98% Top-1 · CPU only**
 
-## Results
+The tuned model uses 51 LightGBM features and topology-aware Viterbi with learned transition scores. The classifier was fitted on all 80 training trips. The separate transition scorer used 78 trips after applying the 50 m alignment-quality filter. Phase 2 reached 0.8825 Macro F1 across the original five training folds. The untuned model reached 0.9065 student-test Macro F1 and 92.84% Top-1. Both sets of weights are available. See the [Phase 2 results](results/phase2/REPORT.md).
 
-| Model | CV Macro F1 | Student-test Macro F1 | Student-test Top-1 |
-|---|---:|---:|---:|
-| Histogram Gradient Boosting | **0.6752** | **0.6903** | **83.74%** |
-| Random Forest | 0.6691 | 0.6788 | 83.45% |
-| Shallow MLP | 0.6611 | 0.6804 | 83.35% |
-| Logistic Regression | 0.6362 | 0.6525 | 81.94% |
-| Shallow Decision Tree | 0.6120 | 0.6181 | 80.91% |
-| Nearest-segment heuristic | 0.3534 | 0.3492 | 53.86% |
+## Start here
 
-See [comparison metrics](results/comparison.csv), [fold metrics](results/cv_fold_metrics.csv), and the [review walkthrough](DEMO.md).
+| File | What it does |
+|---|---|
+| `prepare.py` | Turns the original student ZIP into candidates, 51 features and derived labels. |
+| `train.py` | Retrains the classifier on all 80 trips and fits the learned transition scorer. |
+| `tune.py` | Runs Bayesian tuning, refits both versions and evaluates the same whole-trip partitions. |
+| `serve_api.py` | Starts the FastAPI service with the frozen Phase 2 model on Laptop 1. |
+| `evaluator_ui/` | Browser UI, offline map assets and the Laptop 2 launcher. |
+| `predict.py` | Predicts the arc for each observation in one trip. Uses GPS, nodes and arcs. |
+| `evaluate.py` | Scores the bundled or retrained model on the prepared student-test trips. |
+| `pathsnap/` | Candidate generation, training-label alignment, heading, context, graph, Viterbi and metrics. |
+| `model/` | Phase 1 weights at the root and the Phase 2 default under `phase2-tuned/`. |
+| `results/` | [Experiment report](results/REPORT.md), comparison and per-trip scores. |
+| `Old Models/` | Earlier benchmark, original experiments, demos and working archives. |
 
-## Reproduce the benchmark
+## Reproduce the 10-trip student test
 
-Use Python 3.11 and your original student data ZIP. The archive contains 80 training trips and 10 student-test trips. Each trip contains a GPS track, road nodes, directed arcs, and an ordered reference route.
+Run from this directory with Python 3.11. Supply your original copy of Student folder.zip.
 
 ```sh
-python -m venv .venv
-# Activate .venv for your shell, then run:
 python -m pip install -r requirements.txt
-python benchmark.py prepare --dataset "Student folder.zip" --cache data.joblib --output run
-python benchmark.py run --cache data.joblib --output run
-python summarize.py run
-python verify_alignment.py
+python prepare.py --dataset "Student folder.zip" --split student_test
+python evaluate.py
 ```
 
-The run directory contains the dataset audit, digest, model settings, fold assignments, saved predictions, metrics, and five fitted estimators. The summariser checks the recorded metrics against the predictions and generates the comparison chart. The alignment check compares the route alignment against a brute-force transition calculation on synthetic cases.
+Use `python evaluate.py --legacy` to reproduce the original 0.9065 result. The reserved evaluator trips were outside both experiments.
 
-## Build the Folium demo
-
-After running the benchmark:
+## Predict a trip
 
 ```sh
-python fetch_demo_assets.py --output leaflet
-python demo_map.py --dataset "Student folder.zip" --evidence run --vendor leaflet --trip 00000076 --output PathSnap_Folium_Demo.html
+python predict.py --track trip.track --nodes trip.nodes --arcs trip.arcs --output predictions.csv
 ```
 
-The asset step downloads and verifies pinned Leaflet and jQuery files. Open the generated HTML in a browser. The demo works offline and includes toggleable layers, a corrected match, and a remaining error. Trip 00000076 was drawn from the student-test split before inspecting scores. Boosting reached 82.77% Top-1 on that trip, and nearest segment reached 41.12%.
+The prediction path uses no reference route. Arc IDs are zero-based row indices in the trip's arc file. Arc ID -1 means unmatched. The output marks starts, missing candidates, resumes, GPS gaps and bounded disconnected transitions so a map can avoid drawing a road link across those breaks. Use `--model model` for the untuned weights and the Phase 2 default decoder settings.
 
-## Evaluation design
+## Refit the original baseline on CPU
 
-- Shortlist 64 nearby arc midpoints and keep the eight nearest arcs by point-to-segment distance. Score candidate pairs using distance, heading, movement, and segment geometry. The candidate shortlist is approximate.
-- Align the reference route monotonically to timestamped GPS observations using point-to-segment distance and a 2 m penalty for each skipped intermediate route position. This produces proxy labels for fitting and scoring. Raw GPS observations were kept intact.
-- Fit and validate with five whole-trip folds. Each fit uses alternating observations from every fitting trip. Every held-out observation is scored. Final refits use the 80 training trips and are evaluated on all 10 student-test trips.
-- Report Macro F1 per trip and average the trip scores. Top-1 counts exact aligned-arc matches and includes candidate misses as errors. Candidate log loss uses binary candidate scores. Direct continuity counts adjacent picks that share an arc or connect end-node to start-node.
-- The boosted model uses 75 iterations, 31 maximum leaves per tree, and a 0.10 learning rate. Full configurations are in the benchmark source and are exported with each run.
+```sh
+python prepare.py --dataset "Student folder.zip"
+python train.py --output trained-model
+python evaluate.py --model trained-model --legacy
+```
 
-The classifier results precede Bayesian tuning and HMM/Viterbi reconstruction. The reserved evaluator trips and the live two-laptop integration are outside this baseline.
+Retraining writes to trained-model by default, leaving the verified weights available. The 10 student-test trips are read by the evaluation command. The original configuration search is under [Old Models](Old%20Models/Integrated%20experiment%20sweep/source/README.md).
+
+## Run Phase 2 on CPU
+
+```sh
+python prepare.py --dataset "Student folder.zip" --split train
+python tune.py --dataset "Student folder.zip" --prepared prepared --output phase2-work/run
+python verify_decoder.py
+```
+
+The optimiser uses a Gaussian process with expected improvement. It first tunes the LightGBM scorer against decoded F1 on five original training folds, then tunes the decoder using the selected scorer's out-of-fold predictions. It freezes the settings before scoring any student-test trip and saves separate native model files for the untuned and tuned variants.
+
+## Two-laptop demo
+
+Follow the [two-laptop guide](docs/TWO_LAPTOP_DEMO.md) for setup, rehearsal and the switch to the organiser's evaluation data. Laptop 1 runs inference and scoring. Laptop 2 gets the evaluator UI package and Laptop 1's LAN URL.

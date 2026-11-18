@@ -1,0 +1,47 @@
+{
+  "classifier_fit_trips": 80,
+  "transition_fit_trips": 78,
+  "transition_excluded_trips": [
+    "00000033",
+    "00000054"
+  ],
+  "dataset_sha256": "4804b0399d1d56f4844b9c74e2f998aae0a281fb5947a1f47ad1bd013214d248",
+  "fold_assignments_sha256": "276aecebb9421c84c2b4ce1222a168048d421d9c6f3f7957345445024cf681c0",
+  "lightgbm": {
+    "n_estimators": 250,
+    "learning_rate": 0.06,
+    "num_leaves": 63,
+    "min_child_samples": 40,
+    "subsample": 0.8,
+    "subsample_freq": 1,
+    "colsample_bytree": 0.8,
+    "reg_lambda": 1.0,
+    "device_type": "cpu",
+    "n_jobs": 4,
+    "verbose": -1,
+    "random_state": 352,
+    "deterministic": true,
+    "force_col_wise": true
+  },
+  "topology_costs": [
+    0.0,
+    2.0,
+    6.0,
+    16.0,
+    16.0
+  ],
+  "decoder": {
+    "emission": 0.5,
+    "unsupported_reverse": 0.0,
+    "exact_reverse_cost": null,
+    "network_weight": 0.0,
+    "learned_weight": 0.7,
+    "heading_prior": 0.0,
+    "reset_gaps": false
+  },
+  "cv_macro_f1": 0.8806346641935301,
+  "student_test_macro_f1": 0.9064540798834375,
+  "student_test_top1": 0.9284446764091858,
+  "lightgbm.txt_sha256": "7c1b2b94954ef9637dad7aac9a3ab9b0c9ee0141903e57d4d36e4e55bba1c64c",
+  "transition.json_sha256": "e02ee9ba3d3247289e78a6e8d880702ac033eab6aaa4d1e6bf2ec9841887e1d4"
+}

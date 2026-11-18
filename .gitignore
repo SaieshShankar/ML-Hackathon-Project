@@ -1,10 +1,14 @@
 __pycache__/
 *.py[cod]
 .venv/
+.env
 *.joblib
 *.npz
 *.zip
-/leaflet/
-/run/
-/PathSnap_Folium_Demo.html
-.env
+/prepared/
+/trained-model/
+/evaluation/
+/phase2-work/
+/predicted_arcs.csv
+/predictions.csv
+/Old Models/Local working files/

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="styles.css">
+  <script src="vendor/leaflet/leaflet.js" defer></script>
+  <script src="app.js" defer></script>
+  <title>PathSnap Evaluator</title>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wordmark">
+      <span class="brand-mark" aria-hidden="true">↗</span>
+      <div><strong>PathSnap</strong><span>Evaluator</span></div>
+    </div>
+    <div id="connection" class="connection" data-state="pending"><span></span><strong>Connecting</strong></div>
+  </header>
+  <main class="shell">
+    <div class="page-heading">
+      <h1>Route evaluation</h1>
+      <p id="dataset-mode">Checking the available trip set…</p>
+    </div>
+    <div class="layout">
+      <aside class="panel controls" aria-labelledby="select-title">
+        <h2 id="select-title">Select a trip</h2>
+        <form id="trip-form">
+          <label for="trip">Trip ID</label>
+          <select id="trip" required disabled><option value="">Choose a trip</option></select>
+          <button class="primary" id="run" type="submit" disabled>Run live prediction</button>
+        </form>
+        <p id="error" role="alert" hidden></p>
+        <button id="reconnect" class="secondary" type="button" hidden>Reconnect</button>
+        <div class="server"><span>Laptop 1 API</span><code id="backend">—</code></div>
+        <div class="request" id="request" hidden><span>Request ID</span><code id="request-id">—</code></div>
+      </aside>
+      <section class="panel results" aria-labelledby="result-title">
+        <div class="result-heading">
+          <div><h2 id="result-title">Predicted route</h2><p id="result-sub">Select a trip to run the model.</p></div>
+          <div id="live" class="live" role="status" aria-live="polite"></div>
+        </div>
+        <dl class="metrics" aria-label="Selected-trip scores">
+          <div><dt>Macro F1</dt><dd id="macro-f1">—</dd></div>
+          <div><dt>Top-1 accuracy</dt><dd id="top1">—</dd></div>
+          <div><dt>GPS points assigned</dt><dd id="observations">—</dd></div>
+          <div><dt>Inference time</dt><dd id="latency">—</dd></div>
+        </dl>
+        <div class="map-shell">
+          <div id="map" aria-label="Route map"></div>
+          <div id="map-empty" class="map-empty">
+            <div class="map-emblem" aria-hidden="true">↗</div>
+            <p>Your selected route will appear here.</p>
+          </div>
+        </div>
+        <div class="map-foot">
+          <fieldset id="layers" disabled aria-label="Map layers">
+            <label><input type="checkbox" id="layer-route" checked><i class="swatch route"></i>Predicted route</label>
+            <label><input type="checkbox" id="layer-gps" checked><i class="swatch gps"></i>GPS points</label>
+            <label><input type="checkbox" id="layer-roads" checked><i class="swatch roads"></i>Nearby roads</label>
+          </fieldset>
+          <button class="secondary" id="fit" type="button" disabled>Fit route</button>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
