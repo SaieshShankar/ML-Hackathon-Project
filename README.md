@@ -1,6 +1,19 @@
-# PathSnap champion
+# PathSnap: GPS Map Matching
 
-**Phase 2 default · 0.9127 student-test Macro F1 · 91.98% Top-1 · CPU only**
+**ML hackathon project · LightGBM · topology-aware sequence decoding**
+
+Map noisy GPS observations to road-network arcs using candidate scoring and Viterbi decoding. Includes CPU training, frozen model weights, evaluation reports, a FastAPI service, and a browser demonstration.
+
+## Saved evaluation
+
+| Variant | Student-test Macro F1 | Top-1 accuracy |
+| --- | --- | --- |
+| Tuned Phase 2 default | 0.9127 | 91.98% |
+| Untuned model | 0.9065 | 92.84% |
+
+Results are from the committed experiment reports on **10 student-test trips**, not a fresh run during this documentation update. The original dataset ZIP is required for reproduction. The reserved evaluator trips are separate from this reported student test.
+
+![Macro F1 comparison](results/phase2/macro_f1_comparison.png)
 
 The tuned model uses 51 LightGBM features and topology-aware Viterbi with learned transition scores. The classifier was fitted on all 80 training trips. The separate transition scorer used 78 trips after applying the 50 m alignment-quality filter. Phase 2 reached 0.8825 Macro F1 across the original five training folds. The untuned model reached 0.9065 student-test Macro F1 and 92.84% Top-1. Both sets of weights are available. See the [Phase 2 results](results/phase2/REPORT.md).
 
